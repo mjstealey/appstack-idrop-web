@@ -1,5 +1,4 @@
 FROM centos:centos6.6
-
 MAINTAINER Michael Stealey <michael.j.stealey@gmail.com>
 
 ENV TERM xterm

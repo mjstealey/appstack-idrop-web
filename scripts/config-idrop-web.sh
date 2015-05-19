@@ -1,16 +1,16 @@
 #!/bin/bash
 
-IDROP_WEB_IP_ADDR=$1
-SECRETS_FILE=$2
+IDROP_WEB_IP_ADDR=${1}
+IDROP_CONFIG_FILE=/files/${2}
 
 if [ -z ${IDROP_WEB_IP_ADDR} ]; then
     echo *** Using default web address: localhost ***
     IDROP_WEB_IP_ADDR=localhost;
 fi
 
-if [ -z ${SECRETS_FILE} ]; then
+if [ -z ${IDROP_CONFIG_FILE} ]; then
     echo *** Using default config file: idrop-config.yaml ***
-    SECRETS_FILE=/files/idrop-config.yaml;
+    IDROP_CONFIG_FILE=/files/idrop-config.yaml;
 fi
 
 # Create tomcat service account
@@ -34,8 +34,8 @@ chown -R tomcat /etc/idrop-web/
 sed -i "s/localhost/${IDROP_WEB_IP_ADDR}/g" /etc/idrop-web/idrop-web-config2.groovy
 
 # Refresh environment variables derived from updated secrets
-sed -e "s/:[^:\/\/]/=/g;s/$//g;s/ *=/=/g" ${SECRETS_FILE} > /root/.secret/idrop-config.sh
-while read line; do export $line; done < <(cat /root/.secret/idrop-config.sh)
+sed -e "s/:[^:\/\/]/=/g;s/$//g;s/ *=/=/g" ${IDROP_CONFIG_FILE} > /files/idrop-config.sh
+while read line; do export $line; done < <(cat /files/idrop-config.sh)
 
 # Update idrop-web-config2.groovy with configuration presets
 sed -i "s/idrop.config.preset.host.*/*\/\n idrop.config.preset.host=\"${IDROP_CONFIG_PRESET_HOST}\"/g" /etc/idrop-web/idrop-web-config2.groovy
