@@ -1,16 +1,22 @@
 #!/bin/bash
 
-IDROP_WEB_IP_ADDR=${1}
-IDROP_CONFIG_FILE=/files/${2}
+IDROP_WEB_IP_ADDR=$1
+IDROP_CONFIG_FILE='idrop-config.yaml'
 
+### CHECK IP ADDRESS ###
 if [ -z ${IDROP_WEB_IP_ADDR} ]; then
     echo *** Using default web address: localhost ***
     IDROP_WEB_IP_ADDR=localhost;
 fi
 
-if [ -z ${IDROP_CONFIG_FILE} ]; then
-    echo *** Using default config file: idrop-config.yaml ***
-    IDROP_CONFIG_FILE=/files/idrop-config.yaml;
+### CREATE CONFIG FILE ###
+if [[ -e /conf/$IDROP_CONFIG_FILE ]] ; then
+    echo "*** Importing existing configuration file: /conf/${IDROP_CONFIG_FILE} ***"
+    cp /conf/${IDROP_CONFIG_FILE} /files;
+else
+    echo "*** Generating configuration file: /files/${IDROP_CONFIG_FILE} ***"
+    /scripts/generate-config-file.sh /files/${IDROP_CONFIG_FILE}
+    cp /files/${IDROP_CONFIG_FILE} /conf;
 fi
 
 # Create tomcat service account
@@ -34,7 +40,7 @@ chown -R tomcat /etc/idrop-web/
 sed -i "s/localhost/${IDROP_WEB_IP_ADDR}/g" /etc/idrop-web/idrop-web-config2.groovy
 
 # Refresh environment variables derived from updated secrets
-sed -e "s/:[^:\/\/]/=/g;s/$//g;s/ *=/=/g" ${IDROP_CONFIG_FILE} > /files/idrop-config.sh
+sed -e "s/:[^:\/\/]/=/g;s/$//g;s/ *=/=/g" /files/${IDROP_CONFIG_FILE} > /files/idrop-config.sh
 while read line; do export $line; done < <(cat /files/idrop-config.sh)
 
 # Update idrop-web-config2.groovy with configuration presets
