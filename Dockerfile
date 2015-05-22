@@ -8,7 +8,6 @@ RUN wget http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.r
 RUN rpm -Uvh epel-release-6*.rpm
 
 ADD files /files
-ADD idrop-config.yaml /files/idrop-config.yaml
 ADD scripts /scripts
 WORKDIR /scripts
 RUN chmod a+x *.sh
